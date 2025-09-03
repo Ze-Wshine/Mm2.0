@@ -1,0 +1,233 @@
+\documentclass[UTF8, zihao=-4]{ctexart}
+\usepackage{minted}
+\usemintedstyle{vs}
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{atbegshi}					 % 用于绝对定位（导入图片）
+\usepackage{fancyhdr}
+\usepackage{fontspec}                    % 字体管理
+\usepackage{titlesec}                    % 标题格式定制
+\usepackage{setspace}                    % 行距控制
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{amsmath}
+\usepackage{caption}
+\captionsetup[figure]{labelformat=empty}  % 取消图片前缀
+\captionsetup[table]{labelformat=empty}   % 取消表格前缀
+\usepackage{bm}  
+\usepackage[backend=biber, style=numeric,sorting=none]{biblatex} % 管理参考文献
+\usepackage{hyperref} % 添加超链接
+\hypersetup{
+	colorlinks=true,
+	linkcolor=blue,    % 内部链接颜色
+	citecolor=blue,     % 引用标记颜色
+	urlcolor=blue       % URL颜色
+}
+\setminted{
+	breaklines=true,    % 启用自动换行
+	breakanywhere=true, % 允许在任意字符处换行（可选）
+	breakautoindent=true % 保持换行后的缩进（可选）
+}
+\addbibresource{refs.bib}
+%正文小四宋体 论文题目三号黑体   一级标题四号黑体居中   二三级标题小四黑体左对齐，单倍行距
+
+\singlespacing
+\setlength{\parskip}{0pt}
+
+
+\title{
+	\heiti\zihao{3} % 三号黑体
+	\textbf{Title} \\ % 加粗
+	\vspace{0.5em}
+	
+}
+
+% 一级标题 (section)
+\renewcommand{\thesection}{\chinese{section}} % 将 section 序号转为中文数字
+\titleformat{\section}
+{\centering\heiti\zihao{4}\bfseries} % 四号黑体加粗居中
+{\thesection、}{0em}{}
+
+% 二级标题 (subsection)
+\renewcommand{\thesubsection}{\arabic{section}.\arabic{subsection}} % 强制使用阿拉伯数字
+\titleformat{\subsection}
+{\raggedright\heiti\zihao{-4}\bfseries} % 小四黑体加粗左对齐
+{\thesubsection}{1em}{}
+
+% 三级标题 (subsubsection)
+\titleformat{\subsubsection}
+{\raggedright\heiti\zihao{-4}\bfseries} % 小四黑体加粗左对齐
+{\thesubsubsection}{1em}{}
+
+
+% 设置正文字体页边距
+\geometry{a4paper, left=3cm, right=2.5cm, top=2.5cm, bottom=2.5cm}
+\pagestyle{fancy}  % 激活 fancyhdr 样式
+\fancyhf{}         % 清空默认页眉页脚
+\fancyfoot[C]{\thepage}  % 在页脚居中显示页码
+\renewcommand{\headrulewidth}{0pt}  % 隐藏页眉
+
+\begin{document}
+	
+	% 直接暴力插入图片作封面
+	\newgeometry{margin=0cm, nohead, nofoot}
+	\thispagestyle{empty} % 隐藏封面页页码
+	
+	
+	\AtBeginShipoutNext{%
+		\AtBeginShipoutUpperLeft{%
+			\put(0,-\paperheight){
+				\includegraphics[
+				width=\paperwidth,
+				height=\paperheight,
+				keepaspectratio=false
+%此处插入封面图片
+				]{cover.png}%
+
+			}%
+		}%
+	}
+	\phantom{placeholder}
+	\clearpage % 强制结束封面页
+	\restoregeometry % 恢复正文字体边距
+	
+	\maketitle
+	\thispagestyle{empty}
+	
+	% ==================== 自定义摘要环境 ====================
+	\newenvironment{abstractwithkeywords}
+	{
+		\vspace*{2cm} % 顶部间距
+		\centering
+		{\heiti\zihao{3}\bfseries 摘\quad 要} \\ % 三号黑体加粗
+		\vspace{1cm}
+		\begin{minipage}{0.9\textwidth} % 控制摘要宽度
+			\setlength{\parindent}{2em} % 恢复首行缩进
+			\songti\zihao{-4} % 小四宋体正文
+		}
+		{ % 摘要结束后的关键词部分
+		\end{minipage}
+		\vspace{1cm}
+		
+		{\heiti\zihao{-4}\bfseries 关键词：} % 小四黑体加粗
+		\heiti\zihao{-4}\bfseries 关键词 % 小四宋体
+	}
+	
+	\begin{abstractwithkeywords} 
+		摘要
+	\end{abstractwithkeywords}
+	
+	% ---------- 正文 ----------
+	\newpage
+	\pagenumbering{arabic}  % 设置页码格式为阿拉伯数字
+	\setcounter{page}{1}    % 重置页码为 1（封面页不计数）
+	
+	\section{问题重述}
+	\subsection{问题背景}
+	问题背景
+	\subsection{问题要求} 
+	问题一：
+	
+	问题二：
+	
+	问题三：
+	
+	\section{符号说明}
+	\begin{tabular}{@{}p{6cm} p{8cm}@{}}
+		\toprule
+		\textbf{符号} & \textbf{说明} \\
+		\midrule
+		
+		\bottomrule
+	\end{tabular}
+	
+	\section{问题分析}
+	\begin{itemize}
+		
+		\item 针对问题一：
+		
+		
+		
+		\item 针对问题二:
+		
+		
+		\item 针对问题三:
+		
+	\end{itemize}
+		
+	\section{问题一模型的建立与求解}
+		\subsection{数据分析与处理}
+		
+		\subsection{建模求解}
+
+	\section{问题二模型的建立和求解}
+		\subsection{数据分析与处理}
+
+		\subsection{建模求解}
+	
+	\section{问题三模型的建立与求解}
+		\subsection{数据分析与处理}
+	
+	
+		\subsection{建模求解}
+
+	\subsection{模型效果检验}
+	
+	\subsection{策略分析}
+
+
+
+
+
+
+
+
+
+	\defbibheading{bibliography}[\bibname]{%
+		\section*{#1} % 不编号的 section
+	}
+	\renewcommand{\bibname}{参考文献} % 定义标题名称
+%	\printbibliography
+	
+	\newpage
+	
+	\section*{\textbf{附录 A 支撑材料文件列表}}
+	\begin{table}[H]
+		\centering
+		\begin{tabular}{c c c}
+			\toprule
+			\textbf{文件名} 		& \textbf{文件类型}  & \textbf{简介} \\
+			\midrule
+			
+			\bottomrule
+		\end{tabular}
+	\end{table}
+	
+	\section*{\textbf{附录 B 源数据}}
+	% 表格 1：第一题源数据（2013 - 2023）拆分
+	% 第一个子表格
+	
+	% 第二个子表格
+	
+	% 第三个子表格
+	
+	% 表格 2：家庭结构与第二题源数据拆分
+	% 第一个子表格
+	
+	% 第二个子表格
+
+	% 第三个子表格
+
+	% 表格 3：全省教育经费投入（2015 - 2023），列数少无需拆分
+
+	\section*{\textbf{附录 C 所用软件}}
+	所用软件包括：Excel、PycharmCommunity、VisualStudioCode、TexStudio
+	
+	\section*{\textbf{附录 D 代码}}
+	\inputminted[
+	frame=single,
+	framerule=1pt
+	]{python}{Template.c}
+
+
+\end{document}
