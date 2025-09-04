@@ -11,19 +11,38 @@ from scipy.stats import spearmanr
 data = pd.read_excel("附件.xlsx",sheet_name="男胎检测数据")
 
 # 1.数据预处理
-#转换孕周格式（变为小数周）
+# 转换孕周函数
 def convert_gestational_age(ga_str):
-    if isinstance(ga_str, str):
-        weeks = int(ga_str.split('w')[0])
-        days = int(ga_str.split('+')[1]) if '+' in ga_str else 0
-        return weeks + days / 7
+    if isinstance(ga_str, str):  # 检查是否为字符串
+        try:
+            # 将大写 W 转换为小写 w，确保兼容大小写
+            ga_str = ga_str.lower()
+            # 分割字符串，提取周数和天数
+            weeks_part = ga_str.split('w')[0].strip()
+            weeks = int(weeks_part)  # 转换为整数
+            # 检查是否有天数部分
+            days = 0
+            if '+' in ga_str:
+                days_part = ga_str.split('+')[1].strip()
+                days = int(days_part) if days_part else 0
+            # 确保周数和天数合理
+            if weeks >= 0 and 0 <= days < 7:
+                return weeks + days / 7
+            else:
+                return np.nan
+        except (ValueError, IndexError):
+            return np.nan
     return np.nan
+
+# 读取数据
+data = pd.read_excel("附件.xlsx", sheet_name="男胎检测数据")
 data['GA'] = data['检测孕周'].apply(convert_gestational_age)
+
 # 对 Y 染色体浓度进行 logit 变换
 epsilon = 1e-6  # 避免溢出
 data['Y_concentration_logit'] = np.log(data['Y染色体浓度'] / (1 - data['Y染色体浓度'] + epsilon))
 # 处理日期（末次月经时间和检测日期）
-data['末次月经时间'] = pd.to_datetime(data['末次月经时间'])
+data['末次月经'] = pd.to_datetime(data['末次月经'])
 data['检测日期'] = pd.to_datetime(data['检测日期'])
 # 检查缺失值
 print("缺失值检查：")
@@ -44,7 +63,7 @@ plt.show()
 # BMI 分层分析
 bmi_bins = [20, 28, 32, 36, 40, np.inf]
 bmi_labels = ['[20,28)', '[28,32)', '[32,36)', '[36,40)', '>=40']
-data['BMI_group'] = pd.cut(data['孕妇BMI指标'], bins=bmi_bins, labels=bmi_labels, right=False)
+data['BMI_group'] = pd.cut(data['孕妇BMI'], bins=bmi_bins, labels=bmi_labels, right=False)
 
 plt.figure(figsize=(10, 6))
 sns.lineplot(x='GA', y='Y染色体浓度', hue='BMI_group', data=data)
@@ -54,7 +73,7 @@ plt.title('Y Concentration by BMI Group')
 plt.show()
 
 # Spearman 相关性分析
-corr_vars = ['Y染色体浓度', 'GA', '孕妇BMI指标', '孕妇年龄', 'GC含量', '被过滤掉读段数的比例']
+corr_vars = ['Y染色体浓度', 'GA', '孕妇BMI', '年龄', 'GC含量', '被过滤掉读段数的比例']
 corr_matrix = data[corr_vars].corr(method='spearman')
 plt.figure(figsize=(8, 6))
 sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', vmin=-1, vmax=1)
@@ -75,7 +94,7 @@ print(result_m1.summary())
 
 # 模型 M2: 孕周 + BMI
 model_m2 = MixedLM.from_formula(
-    "Y_concentration_logit ~ GA + 孕妇BMI指标",
+    "Y_concentration_logit ~ GA + 孕妇BMI",
     data,
     groups=data['孕妇代码']
 )
@@ -84,9 +103,9 @@ print("Model M2 (GA + BMI):")
 print(result_m2.summary())
 
 # 模型 M3: 孕周 + BMI + 交互项
-data['GA_BMI_interaction'] = data['GA'] * data['孕妇BMI指标']
+data['GA_BMI_interaction'] = data['GA'] * data['孕妇BMI']
 model_m3 = MixedLM.from_formula(
-    "Y_concentration_logit ~ GA + 孕妇BMI指标 + GA_BMI_interaction",
+    "Y_concentration_logit ~ GA + 孕妇BMI + GA_BMI_interaction",
     data,
     groups=data['孕妇代码']
 )
@@ -96,7 +115,7 @@ print(result_m3.summary())
 
 # 模型 M4: 加入协变量
 model_m4 = MixedLM.from_formula(
-    "Y_concentration_logit ~ GA + 孕妇BMI指标 + GA_BMI_interaction + 孕妇年龄 + GC含量 + IVF妊娠",
+    "Y_concentration_logit ~ GA + 孕妇BMI + GA_BMI_interaction + 年龄 + GC含量 + IVF妊娠",
     data,
     groups=data['孕妇代码']
 )
@@ -106,7 +125,7 @@ print(result_m4.summary())
 
 # 非线性模型 (GAM) 使用 pygam
 gam = LinearGAM(s(0, n_splines=10) + s(1, n_splines=10)).fit(
-    data[['GA', '孕妇BMI指标']], data['Y_concentration_logit']
+    data[['GA', '孕妇BMI']], data['Y_concentration_logit']
 )
 print("GAM Model Summary:")
 print(gam.summary())
@@ -123,7 +142,7 @@ plt.show()
 
 # GAM 预测曲面
 XX, YY = np.meshgrid(np.linspace(data['GA'].min(), data['GA'].max(), 50),
-                     np.linspace(data['孕妇BMI指标'].min(), data['孕妇BMI指标'].max(), 50))
+                     np.linspace(data['孕妇BMI'].min(), data['孕妇BMI'].max(), 50))
 Z = gam.predict(np.c_[XX.ravel(), YY.ravel()]).reshape(XX.shape)
 
 plt.figure(figsize=(10, 6))
@@ -148,7 +167,7 @@ print(f"LRT for Interaction (M2 vs M3): Stat = {lrt_stat:.2f}, p-value = {p_valu
 # 剔除异常值（例如 Y 染色体浓度 < 0.01）
 data_robust = data[data['Y染色体浓度'] > 0.01]
 model_m3_robust = MixedLM.from_formula(
-    "Y_concentration_logit ~ GA + 孕妇BMI指标 + GA_BMI_interaction",
+    "Y_concentration_logit ~ GA + 孕妇BMI + GA_BMI_interaction",
     data_robust,
     groups=data_robust['孕妇代码']
 )
