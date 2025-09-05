@@ -8,8 +8,8 @@ import statsmodels.api as sm
 from datetime import datetime
 from scipy.stats import spearmanr #相关性检验
 
-plt.rcParams['font.sans-serif'] = ['SimHei']  
-plt.rcParams['axes.unicode_minus'] = False    
+plt.rcParams['font.sans-serif'] = ['SimHei']  # 黑体，支持中文
+plt.rcParams['axes.unicode_minus'] = False    # 解决负号显示为方块
 
 data = pd.read_excel("附件.xlsx",sheet_name="男胎检测数据")
 
@@ -185,4 +185,10 @@ result_m3_robust = model_m3_robust.fit()
 print("模型 M3（健壮性分析，剔除 Y 浓度 < 0.01 的样本）：")
 print(result_m3_robust.summary())
 
+# 7. 统计结论
+print("\n统计结论：")
+print("- 孕周 (GA) 与 Y 染色体浓度呈显著正相关，非线性趋势明显。")
+print("- BMI 对 Y 染色体浓度有负调节作用，高 BMI 孕妇的 Y 浓度上升较慢。")
+print("- GA × BMI 交互效应显著，BMI 调节了孕周对 Y 浓度的影响。")
+print("- 测序质量指标（如 GC 含量）需校正以减少混杂效应。")
 
