@@ -8,8 +8,8 @@ import statsmodels.api as sm
 from datetime import datetime
 from scipy.stats import spearmanr #相关性检验
 
-plt.rcParams['font.sans-serif'] = ['SimHei']  
-plt.rcParams['axes.unicode_minus'] = False    
+plt.rcParams['font.sans-serif'] = ['SimHei']  # 黑体，支持中文
+plt.rcParams['axes.unicode_minus'] = False    # 解决负号显示为方块
 
 data = pd.read_excel("附件.xlsx",sheet_name="男胎检测数据")
 
@@ -163,17 +163,7 @@ plt.ylabel('BMI')
 plt.title('GAM 模型预测曲面')
 plt.show()
 
-# 5. 显著性检验
-# 比较 M2 和 M3 (交互项显著性)
-from scipy.stats import chi2
-llf_m2 = result_m2.llf
-llf_m3 = result_m3.llf
-df_diff = result_m3.df_modelwc - result_m2.df_modelwc
-lrt_stat = -2 * (llf_m2 - llf_m3)
-p_value = chi2.sf(lrt_stat, df_diff)
-print(f"交互项显著性检验（M2 vs M3）: 检验统计量 = {lrt_stat:.2f}, p值 = {p_value:.4f}")
-
-# 6. 健壮性与敏感性分析
+# 5. 稳定性与敏感性分析
 # 剔除异常值（例如 Y 染色体浓度 < 0.01）
 data_robust = data[data['Y染色体浓度'] > 0.01]
 model_m3_robust = MixedLM.from_formula(
