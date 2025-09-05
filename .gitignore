@@ -1,3 +1,7 @@
+#Article folder
+/论文
+!/论文/Template.pdf
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
