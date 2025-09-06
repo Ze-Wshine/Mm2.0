@@ -26,9 +26,3 @@ plt.ylabel('组内平方和')
 plt.title('K-means 聚类肘部法则图')
 plt.show()
 
-kmeans = KMeans(n_clusters=4, random_state=42)
-data_unique['Cluster'] = kmeans.fit_predict(X_scaled)
-
-bmi_edges = pd.qcut(data_unique['孕妇BMI'], q=4)
-data_unique['BMI_group'] = bmi_edges
-bmi_ranges = data_unique.groupby('BMI_group')['孕妇BMI'].agg(BMI_Min='min', BMI_Max='max')
